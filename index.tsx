@@ -1,27 +1,36 @@
 import React from 'react';
-import ReactDOM from 'react-dom/client';
+import { createRoot } from 'react-dom/client';
 import App from './App.tsx';
 
-const rootElement = document.getElementById('root');
-if (!rootElement) {
-  throw new Error("Could not find root element to mount to");
-}
+const init = () => {
+  const container = document.getElementById('root');
+  if (!container) {
+    console.error("AceRank Error: Root container not found in DOM.");
+    return;
+  }
 
-try {
-  const root = ReactDOM.createRoot(rootElement);
-  root.render(
-    <React.StrictMode>
-      <App />
-    </React.StrictMode>
-  );
-} catch (error) {
-  console.error("Critical Failure during React hydration:", error);
-  if (rootElement) {
-    rootElement.innerHTML = `
-      <div style="padding: 2rem; color: #dc2626; font-family: sans-serif;">
-        <h1 style="font-size: 1.5rem; font-weight: bold; margin-bottom: 1rem;">Mount Error</h1>
-        <p>${error instanceof Error ? error.message : String(error)}</p>
+  try {
+    const root = createRoot(container);
+    root.render(
+      <React.StrictMode>
+        <App />
+      </React.StrictMode>
+    );
+    console.log("AceRank successfully mounted to #root.");
+  } catch (err) {
+    console.error("AceRank Mounting Error:", err);
+    container.innerHTML = `
+      <div style="padding: 40px; color: #dc2626; font-family: sans-serif; text-align: center;">
+        <h2 style="font-weight: bold; font-size: 1.25rem;">Runtime Error</h2>
+        <p>${err instanceof Error ? err.message : String(err)}</p>
       </div>
     `;
   }
+};
+
+// Check if DOM is ready, then initialize
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
 }

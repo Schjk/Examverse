@@ -1,32 +1,22 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { Question, UserAnswer, AnalysisResult } from '../types.ts';
 
-// The Google GenAI SDK handles the API key via the configuration object.
-// We pull this from the environment variable process.env.API_KEY.
-const getAIClient = () => {
+// Helper to get Gemini client - strictly follows the SDK requirement for named parameter
+const getAI = () => {
   const apiKey = process.env.API_KEY;
-  if (!apiKey) {
-    console.warn("Gemini API Key is missing. AI features will be disabled until an API_KEY is provided in the environment.");
-    return null;
-  }
-  try {
-    return new GoogleGenAI({ apiKey });
-  } catch (e) {
-    console.error("Failed to initialize Google GenAI client:", e);
-    return null;
-  }
+  if (!apiKey) return null;
+  return new GoogleGenAI({ apiKey });
 };
-
-const ai = getAIClient();
 
 export const analyzePerformance = async (
   questions: Question[],
   userAnswers: Record<string, UserAnswer>
 ): Promise<Partial<AnalysisResult>> => {
+  const ai = getAI();
   if (!ai) {
     return {
-      aiRecommendations: "AI Analysis is currently unavailable because no API Key was detected in the environment.",
-      improvementPlan: "Please check your environment settings for the API Key."
+      aiRecommendations: "AI Analysis is currently unavailable. No API Key detected.",
+      improvementPlan: "Please check system configuration."
     };
   }
 
@@ -76,14 +66,15 @@ export const analyzePerformance = async (
   } catch (error) {
     console.error("Gemini Analysis Error:", error);
     return {
-      aiRecommendations: "There was an error generating your AI analysis. Please check your API quota.",
-      improvementPlan: "Review the detailed question analysis manually."
+      aiRecommendations: "Error generating AI insights. Check API status.",
+      improvementPlan: "Review performance manually."
     };
   }
 };
 
 export const generateQuestionExplanation = async (question: Question, userAnswer: string | null): Promise<string> => {
-  if (!ai) return "AI explanation unavailable. No API Key provided.";
+  const ai = getAI();
+  if (!ai) return "AI explanation unavailable.";
 
   const prompt = `
     Explain the solution for this ${question.subject} question.
@@ -100,6 +91,6 @@ export const generateQuestionExplanation = async (question: Question, userAnswer
     });
     return response.text || "No explanation could be generated.";
   } catch (e) {
-    return "The AI failed to generate an explanation. Please try again later.";
+    return "The AI failed to generate an explanation.";
   }
 };
