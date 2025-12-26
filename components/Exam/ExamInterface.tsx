@@ -3,12 +3,12 @@ import { useExam } from '../../context/ExamContext';
 import QuestionPalette from './QuestionPalette';
 import ProctoringMonitor from './ProctoringMonitor';
 import { QuestionType } from '../../types';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Calculator, Info } from 'lucide-react';
 
 const ExamInterface: React.FC = () => {
   const { state, dispatch } = useExam();
-  const history = useHistory();
+  const navigate = useNavigate();
   const currentQ = state.questions[state.currentQuestionIndex];
   const currentAns = state.userAnswers[currentQ.id];
   const [showCalculator, setShowCalculator] = useState(false);
@@ -25,7 +25,7 @@ const ExamInterface: React.FC = () => {
       if (window.confirm("Are you sure you want to submit the exam? You cannot return.")) {
           dispatch({ type: 'END_EXAM' });
           if (document.fullscreenElement) document.exitFullscreen().catch(console.error);
-          history.push('/results');
+          navigate('/results');
       }
   };
 
@@ -129,9 +129,8 @@ const ExamInterface: React.FC = () => {
         <div className="bg-white border-t border-gray-200 p-3 flex justify-between items-center z-10 shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
             <div className="flex gap-2">
                 <button 
-                    onClick={() => dispatch({ type: 'MARK_ANSWER', payload: { questionId: currentQ.id, answer: currentAns?.answer || '' } })} // Just to ensure state update logic for review works
+                    onClick={() => dispatch({ type: 'TOGGLE_REVIEW', payload: { questionId: currentQ.id } })}
                     className="px-4 py-2 bg-white border border-gray-300 rounded hover:bg-gray-50 text-gray-700 font-medium text-sm shadow-sm"
-                    onClickCapture={() => dispatch({ type: 'TOGGLE_REVIEW', payload: { questionId: currentQ.id } })}
                 >
                     Mark for Review & Next
                 </button>
@@ -145,8 +144,6 @@ const ExamInterface: React.FC = () => {
             
             <button 
                 onClick={() => {
-                    // Logic for Save & Next: If current is last, just save.
-                    // Usually Save & Next moves to next.
                     if (state.currentQuestionIndex < state.questions.length - 1) {
                         dispatch({ type: 'JUMP_TO_QUESTION', payload: state.currentQuestionIndex + 1 });
                     }

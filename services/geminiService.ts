@@ -1,26 +1,36 @@
 import { GoogleGenAI, Type } from "@google/genai";
-import { Question, UserAnswer, AnalysisResult } from '../types';
+import { Question, UserAnswer, AnalysisResult } from '../types.ts';
 
-// NOTE: In a real production app, API calls should be routed through a backend to protect the API key.
-// For this demo, we assume the key is available via process.env.
-// If not provided, we will fallback gracefully or show an error.
+// Initialize the Gemini API client. 
+// The API_KEY is provided via the environment's process.env object.
+const getAIClient = () => {
+  // Access process.env.API_KEY safely in the browser context
+  const apiKey = (globalThis as any).process?.env?.API_KEY;
+  if (!apiKey) {
+    console.warn("Gemini API Key is missing from process.env.API_KEY. AI features will be disabled.");
+    return null;
+  }
+  try {
+    return new GoogleGenAI({ apiKey });
+  } catch (e) {
+    console.error("Failed to initialize Gemini API:", e);
+    return null;
+  }
+};
 
-const apiKey = process.env.API_KEY || ''; 
-const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
+const ai = getAIClient();
 
 export const analyzePerformance = async (
   questions: Question[],
   userAnswers: Record<string, UserAnswer>
 ): Promise<Partial<AnalysisResult>> => {
   if (!ai) {
-    console.warn("Gemini API Key missing. Returning mock analysis.");
     return {
-      aiRecommendations: "Please configure your API Key to get AI insights.",
-      improvementPlan: "Review your mistakes in the detailed report."
+      aiRecommendations: "Please configure your API Key in the environment to get AI insights.",
+      improvementPlan: "Review your mistakes in the detailed report below."
     };
   }
 
-  // Prepare data for the prompt
   const performanceData = questions.map(q => {
     const ua = userAnswers[q.id];
     const isCorrect = ua && ua.answer === q.correctAnswer;
@@ -38,9 +48,9 @@ export const analyzePerformance = async (
     Data: ${JSON.stringify(performanceData)}
     
     Provide a structured analysis in JSON format with:
-    1. weakTopics: Array of strings (topics where performance was poor)
-    2. strongTopics: Array of strings (topics where performance was good)
-    3. aiRecommendations: A concise paragraph (max 50 words) giving strategic advice.
+    1. weakTopics: Array of strings
+    2. strongTopics: Array of strings
+    3. aiRecommendations: A concise paragraph
     4. improvementPlan: A list of 3 actionable steps.
   `;
 
@@ -56,19 +66,19 @@ export const analyzePerformance = async (
             weakTopics: { type: Type.ARRAY, items: { type: Type.STRING } },
             strongTopics: { type: Type.ARRAY, items: { type: Type.STRING } },
             aiRecommendations: { type: Type.STRING },
-            improvementPlan: { type: Type.STRING } // Returning as single string for simplicity in display
-          }
+            improvementPlan: { type: Type.STRING }
+          },
+          required: ["weakTopics", "strongTopics", "aiRecommendations", "improvementPlan"]
         }
       }
     });
     
-    const result = JSON.parse(response.text || '{}');
-    return result;
+    return JSON.parse(response.text || '{}');
   } catch (error) {
     console.error("Gemini Analysis Error:", error);
     return {
-      aiRecommendations: "AI Analysis currently unavailable.",
-      improvementPlan: "Focus on revising incorrect questions."
+      aiRecommendations: "AI Analysis currently unavailable. Please check your network or API quota.",
+      improvementPlan: "Focus on revising incorrect questions in the meantime."
     };
   }
 };
@@ -77,13 +87,11 @@ export const generateQuestionExplanation = async (question: Question, userAnswer
   if (!ai) return "AI explanation unavailable (API Key missing).";
 
   const prompt = `
-    Explain the solution for this ${question.subject} question clearly for a student.
+    Explain the solution for this ${question.subject} question.
     Question: ${question.text}
     Options: ${question.options?.join(', ') || 'Numeric Input'}
     Correct Answer: ${question.correctAnswer}
     Student Answered: ${userAnswer || 'Skipped'}
-    
-    Provide a step-by-step explanation. If the student was wrong, explain why their likely approach might have failed.
   `;
 
   try {
@@ -93,6 +101,6 @@ export const generateQuestionExplanation = async (question: Question, userAnswer
     });
     return response.text || "No explanation generated.";
   } catch (e) {
-    return "Failed to generate explanation.";
+    return "Failed to generate explanation. Please try again later.";
   }
 };

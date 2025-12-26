@@ -4,7 +4,7 @@ import { analyzePerformance, generateQuestionExplanation } from '../../services/
 import { AnalysisResult, Question } from '../../types';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { ChevronDown, ChevronUp, AlertCircle, CheckCircle, XCircle, Brain } from 'lucide-react';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const Analysis: React.FC = () => {
   const { state } = useExam();
@@ -12,7 +12,7 @@ const Analysis: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [expandedQuestion, setExpandedQuestion] = useState<string | null>(null);
   const [aiExplanations, setAiExplanations] = useState<Record<string, string>>({});
-  const history = useHistory();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const runAnalysis = async () => {
@@ -89,7 +89,7 @@ const Analysis: React.FC = () => {
                 <h1 className="text-3xl font-bold text-gray-900">Exam Analysis Report</h1>
                 <p className="text-gray-500">JEE Main Full Mock Test 01 • {new Date().toLocaleDateString()}</p>
             </div>
-            <button onClick={() => history.push('/')} className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Back to Dashboard</button>
+            <button onClick={() => navigate('/')} className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Back to Dashboard</button>
         </div>
 
         {/* Score Cards */}
