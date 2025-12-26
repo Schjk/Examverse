@@ -1,4 +1,4 @@
-import { Question, QuestionType, Subject, Difficulty } from '../types';
+import { Question, QuestionType, Subject, Difficulty } from '../types.ts';
 
 export const MOCK_QUESTIONS: Question[] = [
   // PHYSICS
@@ -76,7 +76,7 @@ export const MOCK_QUESTIONS: Question[] = [
     subject: Subject.MATHS,
     topic: "Permutations & Combinations",
     difficulty: Difficulty.HARD,
-    correctAnswer: "2600", // Simplified for demo
+    correctAnswer: "2600",
     solution: "Let X = x+1, Y = y+1, etc. X+Y+Z+W = 24. Use (n+r-1)Cr-1 formula."
   }
 ];

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useExam } from '../../context/ExamContext';
+import { useExam } from '../../context/ExamContext.tsx';
 import { Camera, AlertTriangle } from 'lucide-react';
 
 const ProctoringMonitor: React.FC = () => {
@@ -8,7 +8,6 @@ const ProctoringMonitor: React.FC = () => {
   const [permissionError, setPermissionError] = useState(false);
   const [warnings, setWarnings] = useState<string[]>([]);
 
-  // 1. Webcam Setup
   useEffect(() => {
     if (!state.isActive) return;
 
@@ -36,7 +35,6 @@ const ProctoringMonitor: React.FC = () => {
     };
   }, [state.isActive, dispatch]);
 
-  // 2. Tab Switch & Fullscreen Detection
   useEffect(() => {
     if (!state.isActive) return;
 
@@ -65,7 +63,6 @@ const ProctoringMonitor: React.FC = () => {
 
   const addWarning = (msg: string) => {
     setWarnings(prev => [...prev.slice(-2), `${msg} at ${new Date().toLocaleTimeString()}`]);
-    // Auto clear after 5s
     setTimeout(() => {
        setWarnings(prev => prev.slice(1));
     }, 5000);
@@ -75,7 +72,6 @@ const ProctoringMonitor: React.FC = () => {
 
   return (
     <div className="fixed bottom-4 left-4 z-50 flex flex-col items-start gap-2">
-      {/* Warning Toasts */}
       <div className="flex flex-col gap-1 mb-2">
         {warnings.map((w, i) => (
           <div key={i} className="bg-red-600 text-white text-xs px-3 py-1 rounded shadow-lg animate-bounce flex items-center gap-2">
@@ -84,7 +80,6 @@ const ProctoringMonitor: React.FC = () => {
         ))}
       </div>
 
-      {/* Camera Feed */}
       <div className="relative w-32 h-24 bg-black rounded overflow-hidden shadow-2xl border-2 border-gray-700">
         {!permissionError ? (
           <video 

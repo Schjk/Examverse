@@ -1,4 +1,4 @@
-import { QuestionStatus } from './types';
+import { QuestionStatus } from './types.ts';
 
 export const EXAM_RULES = [
   "The clock will be set at the server. The countdown timer in the top right corner of screen will display the remaining time available for you to complete the examination.",

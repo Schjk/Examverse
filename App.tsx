@@ -7,7 +7,7 @@ import Analysis from './components/Results/Analysis.tsx';
 
 const App: React.FC = () => {
   return (
-    <Router>
+    <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <ExamProvider>
         <Routes>
           <Route path="/" element={<Dashboard />} />
