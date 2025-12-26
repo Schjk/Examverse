@@ -1,0 +1,8 @@
+{
+  "name": "AceRank - AI-Powered CBT Platform",
+  "description": "A professional-grade Computer Based Test platform for JEE/NEET preparation with Gemini AI analytics and proctoring.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
