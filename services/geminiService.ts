@@ -1,19 +1,18 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { Question, UserAnswer, AnalysisResult } from '../types.ts';
 
-// Initialize the Gemini API client. 
-// The API_KEY is provided via the environment's process.env object.
+// The Google GenAI SDK handles the API key via the configuration object.
+// We pull this from the environment variable process.env.API_KEY.
 const getAIClient = () => {
-  // Access process.env.API_KEY safely in the browser context
-  const apiKey = (globalThis as any).process?.env?.API_KEY;
+  const apiKey = process.env.API_KEY;
   if (!apiKey) {
-    console.warn("Gemini API Key is missing from process.env.API_KEY. AI features will be disabled.");
+    console.warn("Gemini API Key is missing. AI features will be disabled until an API_KEY is provided in the environment.");
     return null;
   }
   try {
     return new GoogleGenAI({ apiKey });
   } catch (e) {
-    console.error("Failed to initialize Gemini API:", e);
+    console.error("Failed to initialize Google GenAI client:", e);
     return null;
   }
 };
@@ -26,8 +25,8 @@ export const analyzePerformance = async (
 ): Promise<Partial<AnalysisResult>> => {
   if (!ai) {
     return {
-      aiRecommendations: "Please configure your API Key in the environment to get AI insights.",
-      improvementPlan: "Review your mistakes in the detailed report below."
+      aiRecommendations: "AI Analysis is currently unavailable because no API Key was detected in the environment.",
+      improvementPlan: "Please check your environment settings for the API Key."
     };
   }
 
@@ -77,14 +76,14 @@ export const analyzePerformance = async (
   } catch (error) {
     console.error("Gemini Analysis Error:", error);
     return {
-      aiRecommendations: "AI Analysis currently unavailable. Please check your network or API quota.",
-      improvementPlan: "Focus on revising incorrect questions in the meantime."
+      aiRecommendations: "There was an error generating your AI analysis. Please check your API quota.",
+      improvementPlan: "Review the detailed question analysis manually."
     };
   }
 };
 
 export const generateQuestionExplanation = async (question: Question, userAnswer: string | null): Promise<string> => {
-  if (!ai) return "AI explanation unavailable (API Key missing).";
+  if (!ai) return "AI explanation unavailable. No API Key provided.";
 
   const prompt = `
     Explain the solution for this ${question.subject} question.
@@ -99,8 +98,8 @@ export const generateQuestionExplanation = async (question: Question, userAnswer
       model: 'gemini-3-flash-preview',
       contents: prompt,
     });
-    return response.text || "No explanation generated.";
+    return response.text || "No explanation could be generated.";
   } catch (e) {
-    return "Failed to generate explanation. Please try again later.";
+    return "The AI failed to generate an explanation. Please try again later.";
   }
 };
